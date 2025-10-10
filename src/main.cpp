@@ -1,7 +1,9 @@
 #include <iostream>
+
+#include <config.hpp>
 #include <utils/cuda_dev_info.hpp>
 
 int main() {
-    cuda_print_device_info_all();
+    IF_DEBUG(cuda_print_device_info_all());
     return 0;
 }
