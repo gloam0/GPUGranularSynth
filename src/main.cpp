@@ -6,9 +6,13 @@
 int main() {
     int dev_count = cuda_get_device_count();
     int dev_use = (dev_count > 1) ? config::CUDA_SELECTED_DEVICE : 0;
+    cudaDeviceProp dev_use_prop = cuda_get_device_properties(0);
+
     cudaSetDevice(dev_use);
     std::cout << "Selected device " << dev_use << "\n";
-    IF_DEBUG(cuda_print_device_info_all());
+    IF_DEBUG(cuda_print_device_info(&dev_use_prop));
+
+
 
     return 0;
 }
