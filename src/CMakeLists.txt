@@ -10,7 +10,14 @@ target_include_directories(GPUGranularSynth
 )
 
 target_link_libraries(GPUGranularSynth
+        PUBLIC
+        juce::juce_recommended_warning_flags
+        juce::juce_recommended_config_flags
+        $<$<CONFIG:Release>:juce::juce_recommended_lto_flags>
         PRIVATE
+        juce::juce_core
+        juce::juce_events
+        juce::juce_audio_devices
         CUDA::cudart
         utils
 )
