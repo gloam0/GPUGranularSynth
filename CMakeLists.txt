@@ -36,6 +36,8 @@ add_subdirectory(external/JUCE)
 
 add_subdirectory(src)
 
+add_subdirectory(test)
+
 target_compile_definitions(GPUGranularSynth PRIVATE
         $<$<CONFIG:Debug>:PROJ_DEBUG=1>
         $<$<CONFIG:Release>:PROJ_DEBUG=0>
