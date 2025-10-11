@@ -30,6 +30,10 @@ public:
 
     int get_underruns() const;
 
+    uint64_t get_read_count() const;
+
+    uint64_t get_write_count() const;
+
     // monotonically increasing write/read counts
     // alignas(64) to prevent cache invalidations
     alignas(64) std::atomic<uint64_t> write_count{0};

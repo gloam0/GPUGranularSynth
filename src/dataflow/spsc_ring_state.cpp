@@ -42,3 +42,7 @@ bool SPSCRingState::get_last_good(size_t& slot) const {
 }
 
 int SPSCRingState::get_underruns() const { return underruns; };
+
+uint64_t SPSCRingState::get_read_count() const { return read_count.load(std::memory_order_acquire); };
+
+uint64_t SPSCRingState::get_write_count() const { return write_count.load(std::memory_order_acquire); };
