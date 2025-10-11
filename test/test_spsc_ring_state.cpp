@@ -115,6 +115,13 @@ TEST_CASE("Simple producer/consumer threads") {
             last = slot;
             ++expected;
         }
+
+        uint64_t r_curr{};
+        size_t slot{};
+
+        CHECK_FALSE(rs.acquire_read(r_curr, slot));
+        rs.get_last_good(slot);
+        CHECK(slot == (N - 1) % rs.slots);
     });
     prod.join();
     cons.join();
