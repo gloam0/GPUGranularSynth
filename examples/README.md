@@ -1,0 +1,1 @@
+These are various example setups, prototypes, etc. of various components, and are not built with the main project.
