@@ -51,8 +51,9 @@ void SPSCRingConsumer::process(float* const* out, int num_channels, int num_samp
         // if we finished consuming the current block this iter, publish the
         // read and mark have_block false.
         if (sample_idx >= ring[slot].samples) {
-            if (have_block) rs.publish_read(r_curr);
+            if (have_block && block_acquired) rs.publish_read(r_curr);
             have_block = false;
+            block_acquired = false;
         }
 
         // If the block is exactly consumed here, loop will publish on next iteration
@@ -62,16 +63,24 @@ void SPSCRingConsumer::process(float* const* out, int num_channels, int num_samp
 bool SPSCRingConsumer::try_acquire_block() {
     size_t slot_next{};
     uint64_t r_curr_next{r_curr};
-    // non-blocking, if no block ready try get_last_good
-    if (!rs.acquire_read(r_curr_next, slot_next)) {
-        if (!rs.get_last_good(slot_next)) {
-            have_block = false;
-            return false;
-        }
+    if (rs.acquire_read(r_curr_next, slot_next)) {
+        slot = slot_next;
+        r_curr = r_curr_next;
+        sample_idx = 0;
+        have_block = true;
+        block_acquired = true;
+        return true;
     }
-    slot = slot_next;
-    r_curr = r_curr_next;
-    sample_idx = 0;
-    have_block = true;
-    return true;
+    // fallback, did not acquire a new block
+    if (rs.get_last_good(slot_next)) {
+        slot = slot_next;
+        sample_idx = 0;
+        have_block = true;
+        block_acquired = false;  // do not publish_read()
+        return true;
+    }
+
+    have_block = false;
+    block_acquired = false;
+    return false;
 }
