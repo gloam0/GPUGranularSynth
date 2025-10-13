@@ -34,11 +34,11 @@ endif()
 add_subdirectory(external/JUCE)
 # } JUCE
 
-add_subdirectory(src)
-
-add_subdirectory(test)
-
-target_compile_definitions(GPUGranularSynth PRIVATE
+add_compile_definitions(
         $<$<CONFIG:Debug>:PROJ_DEBUG=1>
         $<$<CONFIG:Release>:PROJ_DEBUG=0>
 )
+
+add_subdirectory(src)
+
+add_subdirectory(test)
