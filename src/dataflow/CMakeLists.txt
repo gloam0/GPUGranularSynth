@@ -1,5 +1,6 @@
 add_library(dataflow
         spsc_ring_state.cpp
+        spsc_ring_consumer.cpp
 )
 
 target_include_directories(dataflow
