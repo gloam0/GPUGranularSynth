@@ -23,7 +23,10 @@ bool juce_dm_setup(juce::AudioDeviceManager& dm) {
                   << " (requested=" << config::DEV_BLOCK_SIZE << ")\n"
                   << "    sample_rate=" << dev->getCurrentSampleRate() << "\n"
                   << "Compare (generator):" << "\n"
-                  << "    buffer_size=" << config::GEN_BLOCK_SIZE << "\n";
+                  << "    buffer_size=" << config::GEN_BLOCK_SIZE << "\n"
+                  << "Timing:" << "\n"
+                  << "    generator_cadence = " << config::block_latency_ms() << " ms" << "\n"
+                  << "    latency = " << config::ring_latency_ms() << " ms" << "\n";
         );
 
         config::SAMPLE_RATE = dev->getCurrentSampleRate();
