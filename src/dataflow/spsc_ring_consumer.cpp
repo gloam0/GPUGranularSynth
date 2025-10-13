@@ -37,12 +37,15 @@ void SPSCRingConsumer::process(float* const* out, int num_channels, int num_samp
         const int samples_avail = static_cast<int>(block.samples) - static_cast<int>(sample_idx);
         const int samples_to_copy = std::min(samples_avail, num_samples - i);
 
-        // de-interleave into buffer channels
-        for (int n = 0; n < samples_to_copy; ++n) {
-            const int already_consumed = (sample_idx + n) * block.channels;
-            for (int ch = 0; ch < std::min<int>(block.channels, num_channels); ch++)
-                out[ch][i + n] = block.data[already_consumed + ch];
-        }
+        // Planar copy: each channel plane is contiguous. Bulk copy per channel.
+        // AudioBlock::ch(ch) returns the start of that channel's plane.
+        for (int ch = 0; ch < std::min<int>(num_channels, AudioBlock::channels); ++ch) {
+            std::memcpy(
+                out[ch] + i,
+                block.ch(ch) + sample_idx,
+                static_cast<size_t>(samples_to_copy) * sizeof(float)
+            );
+        } // extra device channels remain zero
 
         // update state
         sample_idx += samples_to_copy;

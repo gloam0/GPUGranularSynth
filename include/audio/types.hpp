@@ -9,12 +9,21 @@
 #endif
 #include <config.hpp>
 
+/*
+ * channel-major audio block
+ */
 struct alignas(64) AudioBlock {
-    uint64_t seq = 0;
     uint32_t samples = 0;
-    uint32_t channels = config::NUM_CHANNELS;
-    // interleaved
+    static constexpr uint32_t channels = config::NUM_CHANNELS;
     std::array<float, config::GEN_BLOCK_SIZE * config::NUM_CHANNELS> data{};
+
+    inline float* ch(uint32_t ch) noexcept {
+        return data.data() + ch * config::GEN_BLOCK_SIZE;
+    }
+
+    inline const float* ch(uint32_t ch) const noexcept {
+        return data.data() + ch * config::GEN_BLOCK_SIZE;
+    }
 };
 
 #endif //GPUGRANULARSYNTH_TYPES_HPP
