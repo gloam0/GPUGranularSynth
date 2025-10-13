@@ -7,7 +7,7 @@ add_executable(unit_tests
 target_include_directories(unit_tests
         PRIVATE
         ${CMAKE_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/external/doctest
+        ${CMAKE_SOURCE_DIR}/external/doctest/doctest/
 )
 
 target_link_libraries(unit_tests
