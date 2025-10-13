@@ -1,5 +1,6 @@
 add_subdirectory(utils)
 add_subdirectory(dataflow)
+add_subdirectory(audio)
 
 add_executable(GPUGranularSynth
         main.cpp
@@ -22,4 +23,5 @@ target_link_libraries(GPUGranularSynth
         CUDA::cudart
         utils
         dataflow
+        audio
 )

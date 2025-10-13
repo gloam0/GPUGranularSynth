@@ -3,16 +3,19 @@
 
 #if PROJ_DEBUG
     #define IF_DEBUG(expr) do { expr; } while (0)
+    #define IF_RELEASE(expr) ((void)0)
 #else
     #define IF_DEBUG(expr) ((void)0)
+    #define IF_RELEASE(expr) do { expr; } while (0)
 #endif
 
 
 namespace config {
 
 // Audio
-    constexpr int SAMPLE_RATE = 48000;
-    constexpr int BLOCK_SIZE = 256;
+    inline int SAMPLE_RATE = 48000;  // non-const, sample rate can technically change at runtime
+    constexpr int GEN_BLOCK_SIZE = 1024;
+    inline int DEV_BLOCK_SIZE = 128;
     // Number of GPU-write-CPU-read buffers in the ring (>1), e.g., 3 for triple-buffering,
     // induces BUFFER_RING_SIZE * BLOCK_SIZE / SAMPLE_RATE constant latency
     constexpr int BUFFER_RING_SIZE = 3;

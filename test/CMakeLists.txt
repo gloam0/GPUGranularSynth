@@ -13,6 +13,7 @@ target_link_libraries(unit_tests
         PRIVATE
         utils
         dataflow
+        audio
         juce::juce_core
         juce::juce_events
         juce::juce_audio_devices
