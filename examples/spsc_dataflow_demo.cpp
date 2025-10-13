@@ -5,7 +5,7 @@
 #include <config.hpp>
 #include <dataflow/spsc_ring_state.hpp>
 
-void spsc_dataflow_demo() {
+int main() {
     SPSCRingState rs(config::BUFFER_RING_SIZE);
 
     std::vector<uint64_t> ring(config::BUFFER_RING_SIZE, 0);
@@ -59,4 +59,5 @@ void spsc_dataflow_demo() {
 
     prod.join();
     cons.join();
+    return 0;
 }
