@@ -1,6 +1,7 @@
 add_executable(unit_tests
         main_tests.cpp
         test_spsc_ring_state.cpp
+        test_spsc_ring_consumer.cpp
 )
 
 target_include_directories(unit_tests

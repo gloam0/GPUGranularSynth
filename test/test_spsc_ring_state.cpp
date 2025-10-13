@@ -4,7 +4,7 @@
 #include <vector>
 #include <atomic>
 
-TEST_CASE("Empty ring - acquire_read() fails, underruns = 1, get_last_good() fails") {
+TEST_CASE("SPSCRingState: Empty ring - acquire_read() fails, underruns = 1, get_last_good() fails") {
     SPSCRingState rs(3);
     uint64_t r_curr{};
     size_t slot{};
@@ -16,7 +16,7 @@ TEST_CASE("Empty ring - acquire_read() fails, underruns = 1, get_last_good() fai
     CHECK(rs.get_write_count() == 0);
 }
 
-TEST_CASE("One write, one read") {
+TEST_CASE("SPSCRingState: One write, one read") {
     SPSCRingState rs(3);
     uint64_t w_curr{};
     uint64_t r_curr{};
@@ -37,7 +37,7 @@ TEST_CASE("One write, one read") {
     CHECK(rs.get_write_count() == 1);
 }
 
-TEST_CASE("Writes blocked if 'full'") {
+TEST_CASE("SPSCRingState: Writes blocked if 'full'") {
     SPSCRingState rs(3);
     uint64_t w_curr{};
     size_t slot{};
@@ -54,7 +54,7 @@ TEST_CASE("Writes blocked if 'full'") {
     CHECK(rs.get_write_count() == 3);
 }
 
-TEST_CASE("If empty, get_last_good returns most recent consumed slot") {
+TEST_CASE("SPSCRingState: If empty, get_last_good returns most recent consumed slot") {
     SPSCRingState rs(3);
     uint64_t w_curr{};
     size_t slot{};
@@ -80,7 +80,7 @@ TEST_CASE("If empty, get_last_good returns most recent consumed slot") {
     CHECK(last == 1);
 }
 
-TEST_CASE("Simple producer/consumer threads") {
+TEST_CASE("SPSCRingState: Simple producer/consumer threads") {
     SPSCRingState rs(3);
     constexpr int N = 100;
     std::vector<int> buf(rs.slots);
