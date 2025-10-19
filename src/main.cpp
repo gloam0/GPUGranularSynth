@@ -1,18 +1,16 @@
+#include <array>
 #include <iostream>
-
+#include <chrono>
 #include <config.hpp>
 #include <utils/cuda_dev_info.hpp>
+#include <utils/utils.hpp>
 
+#include <audio/audio_juce.hpp>
+
+#include <juce_audio_basics/juce_audio_basics.h>
+#include <juce_audio_devices/juce_audio_devices.h>
+
+int run_vecadd_cuda();
 int main() {
-    int dev_count = cuda_get_device_count();
-    int dev_use = (dev_count > 1) ? config::CUDA_SELECTED_DEVICE : 0;
-    cudaDeviceProp dev_use_prop = cuda_get_device_properties(0);
-
-    cudaSetDevice(dev_use);
-    std::cout << "Selected device " << dev_use << "\n";
-    IF_DEBUG(cuda_print_device_info(&dev_use_prop));
-
-
-
-    return 0;
+    return run_vecadd_cuda();
 }

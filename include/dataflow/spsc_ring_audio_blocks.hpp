@@ -12,7 +12,7 @@ public:
     void start();
     void stop();
     // copies directly from ring to out
-    void process(float* const* out, int num_channels, int num_samples);
+    void consume(float* const* out, int num_channels, int num_samples);
 
 private:
     bool try_acquire_block();

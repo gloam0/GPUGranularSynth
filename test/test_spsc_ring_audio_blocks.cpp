@@ -1,6 +1,6 @@
 #include <doctest.h>
 #include <thread>
-#include <dataflow/spsc_ring_consumer.hpp>
+#include <dataflow/spsc_ring_audio_blocks.hpp>
 #include <config.hpp>
 
 
@@ -28,7 +28,7 @@ TEST_CASE("SPSCRingConsumer: config defaults, P/C, no underruns") {
     float* const* out = _out.data();
 
     SPSCRingState rs(config::BUFFER_RING_SIZE);
-    SPSCRingConsumer rc(rs, ring);
+    SPSCRingAudioBlocks rc(rs, ring);
 
     std::thread prod([&] {
         int ct = 0;
@@ -38,14 +38,12 @@ TEST_CASE("SPSCRingConsumer: config defaults, P/C, no underruns") {
             while (!rs.acquire_write(w_curr, slot)) {}
             auto& block = ring[slot];
             block.samples = config::GEN_BLOCK_SIZE;
-            block.channels = config::NUM_CHANNELS;
             float* slot_buf = block.data.data();
             for (size_t i = 0; i < config::GEN_BLOCK_SIZE; ++i) {
                 for (size_t j = 0; j < config::NUM_CHANNELS; ++j) {
                     slot_buf[config::NUM_CHANNELS * i + j] = ct++;
                 }
             }
-            block.seq = w_curr;
             rs.publish_write(w_curr);
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
@@ -54,7 +52,7 @@ TEST_CASE("SPSCRingConsumer: config defaults, P/C, no underruns") {
     std::thread cons([&] {
         int expected = 0;
         while (expected <= prod_N * config::GEN_BLOCK_SIZE * config::NUM_CHANNELS) {
-            rc.process(out, config::NUM_CHANNELS, config::DEV_BLOCK_SIZE);
+            rc.consume(out, config::NUM_CHANNELS, config::DEV_BLOCK_SIZE);
 
             for (size_t j = 0; j < config::DEV_BLOCK_SIZE; ++j) {
                 for (size_t i = 0; i < config::NUM_CHANNELS; i++) {
@@ -87,7 +85,7 @@ TEST_CASE("SPSCRingConsumer: config defaults, P/C, underruns") {
     float* const* out = _out.data();
 
     SPSCRingState rs(config::BUFFER_RING_SIZE);
-    SPSCRingConsumer rc(rs, ring);
+    SPSCRingAudioBlocks rc(rs, ring);
 
     std::thread prod([&] {
         int ct = 1;
@@ -97,14 +95,12 @@ TEST_CASE("SPSCRingConsumer: config defaults, P/C, underruns") {
             while (!rs.acquire_write(w_curr, slot)) {}
             auto& block = ring[slot];
             block.samples = config::GEN_BLOCK_SIZE;
-            block.channels = config::NUM_CHANNELS;
             float* slot_buf = block.data.data();
             for (size_t i = 0; i < config::GEN_BLOCK_SIZE; ++i) {
                 for (size_t j = 0; j < config::NUM_CHANNELS; ++j) {
                     slot_buf[config::NUM_CHANNELS * i + j] = ct++;
                 }
             }
-            block.seq = w_curr;
             rs.publish_write(w_curr);
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
@@ -121,7 +117,7 @@ TEST_CASE("SPSCRingConsumer: config defaults, P/C, underruns") {
                     out[i][j] = -1.f;
                 }
             }
-            rc.process(out, config::NUM_CHANNELS, config::DEV_BLOCK_SIZE);
+            rc.consume(out, config::NUM_CHANNELS, config::DEV_BLOCK_SIZE);
             bool saw_good = false;
             for (size_t j = 0; j < config::DEV_BLOCK_SIZE; ++j) {
                 for (size_t i = 0; i < config::NUM_CHANNELS; i++) {
@@ -156,7 +152,7 @@ TEST_CASE("SPSCRingConsumer: dev buffer > gen buffer, P/C, underruns") {
     float* const* out = _out.data();
 
     SPSCRingState rs(config::BUFFER_RING_SIZE);
-    SPSCRingConsumer rc(rs, ring);
+    SPSCRingAudioBlocks rc(rs, ring);
 
     std::thread prod([&] {
         int ct = 1;
@@ -166,14 +162,12 @@ TEST_CASE("SPSCRingConsumer: dev buffer > gen buffer, P/C, underruns") {
             while (!rs.acquire_write(w_curr, slot)) {}
             auto& block = ring[slot];
             block.samples = config::GEN_BLOCK_SIZE;
-            block.channels = config::NUM_CHANNELS;
             float* slot_buf = block.data.data();
             for (size_t i = 0; i < config::GEN_BLOCK_SIZE; ++i) {
                 for (size_t j = 0; j < config::NUM_CHANNELS; ++j) {
                     slot_buf[config::NUM_CHANNELS * i + j] = ct++;
                 }
             }
-            block.seq = w_curr;
             rs.publish_write(w_curr);
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
@@ -190,7 +184,7 @@ TEST_CASE("SPSCRingConsumer: dev buffer > gen buffer, P/C, underruns") {
                     out[i][j] = -1.f;
                 }
             }
-            rc.process(out, config::NUM_CHANNELS, config::DEV_BLOCK_SIZE);
+            rc.consume(out, config::NUM_CHANNELS, config::DEV_BLOCK_SIZE);
             bool saw_good = false;
             for (size_t j = 0; j < config::DEV_BLOCK_SIZE; ++j) {
                 for (size_t i = 0; i < config::NUM_CHANNELS; i++) {
@@ -225,7 +219,7 @@ TEST_CASE("SPSCRingConsumer: dev buffer == gen buffer, P/C, underruns") {
     float* const* out = _out.data();
 
     SPSCRingState rs(config::BUFFER_RING_SIZE);
-    SPSCRingConsumer rc(rs, ring);
+    SPSCRingAudioBlocks rc(rs, ring);
 
     std::thread prod([&] {
         int ct = 1;
@@ -235,14 +229,12 @@ TEST_CASE("SPSCRingConsumer: dev buffer == gen buffer, P/C, underruns") {
             while (!rs.acquire_write(w_curr, slot)) {}
             auto& block = ring[slot];
             block.samples = config::GEN_BLOCK_SIZE;
-            block.channels = config::NUM_CHANNELS;
             float* slot_buf = block.data.data();
             for (size_t i = 0; i < config::GEN_BLOCK_SIZE; ++i) {
                 for (size_t j = 0; j < config::NUM_CHANNELS; ++j) {
                     slot_buf[config::NUM_CHANNELS * i + j] = ct++;
                 }
             }
-            block.seq = w_curr;
             rs.publish_write(w_curr);
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
@@ -259,7 +251,7 @@ TEST_CASE("SPSCRingConsumer: dev buffer == gen buffer, P/C, underruns") {
                     out[i][j] = -1.f;
                 }
             }
-            rc.process(out, config::NUM_CHANNELS, config::DEV_BLOCK_SIZE);
+            rc.consume(out, config::NUM_CHANNELS, config::DEV_BLOCK_SIZE);
             bool saw_good = false;
             for (size_t j = 0; j < config::DEV_BLOCK_SIZE; ++j) {
                 for (size_t i = 0; i < config::NUM_CHANNELS; i++) {
@@ -294,7 +286,7 @@ TEST_CASE("SPSCRingConsumer: dev buffer < gen buffer, P/C, underruns") {
     float* const* out = _out.data();
 
     SPSCRingState rs(config::BUFFER_RING_SIZE);
-    SPSCRingConsumer rc(rs, ring);
+    SPSCRingAudioBlocks rc(rs, ring);
 
     std::thread prod([&] {
         int ct = 1;
@@ -304,14 +296,12 @@ TEST_CASE("SPSCRingConsumer: dev buffer < gen buffer, P/C, underruns") {
             while (!rs.acquire_write(w_curr, slot)) {}
             auto& block = ring[slot];
             block.samples = config::GEN_BLOCK_SIZE;
-            block.channels = config::NUM_CHANNELS;
             float* slot_buf = block.data.data();
             for (size_t i = 0; i < config::GEN_BLOCK_SIZE; ++i) {
                 for (size_t j = 0; j < config::NUM_CHANNELS; ++j) {
                     slot_buf[config::NUM_CHANNELS * i + j] = ct++;
                 }
             }
-            block.seq = w_curr;
             rs.publish_write(w_curr);
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
@@ -328,7 +318,7 @@ TEST_CASE("SPSCRingConsumer: dev buffer < gen buffer, P/C, underruns") {
                     out[i][j] = -1.f;
                 }
             }
-            rc.process(out, config::NUM_CHANNELS, config::DEV_BLOCK_SIZE);
+            rc.consume(out, config::NUM_CHANNELS, config::DEV_BLOCK_SIZE);
             bool saw_good = false;
             for (size_t j = 0; j < config::DEV_BLOCK_SIZE; ++j) {
                 for (size_t i = 0; i < config::NUM_CHANNELS; i++) {
