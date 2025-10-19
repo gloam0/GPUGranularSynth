@@ -71,7 +71,8 @@ int main() {
     });
 
     // Create player, start consuming from audio callback
-    SPSCRingPlayer player{ rs, ring };
+    SampleClock sc{config::SAMPLE_RATE};
+    SPSCRingPlayer player{ rs, ring, sc };
     dm.addAudioCallback(&player);
 
     while (true) std::this_thread::sleep_for(std::chrono::milliseconds(50));
