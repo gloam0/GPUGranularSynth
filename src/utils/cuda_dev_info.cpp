@@ -1,4 +1,4 @@
-#include <utils/utils.hpp>
+#include <utils/utils.cuh>
 #include <utils/cuda_dev_info.hpp>
 
 #include "config.hpp"
