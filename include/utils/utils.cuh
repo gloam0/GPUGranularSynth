@@ -32,12 +32,4 @@ inline void cuda_check_last(const char* file, int line) {
     }
 }
 
-using namespace std::chrono_literals;
-
-// e.g., 'sleep(10ms)'
-template<typename Rep, typename Period>
-void sleep(const std::chrono::duration<Rep, Period>& duration) {
-    std::this_thread::sleep_for(duration);
-}
-
 #endif //GPUGRANULARSYNTH_UTILS_CUH
