@@ -1,6 +1,7 @@
 #ifndef GPUGRANULARSYNTH_UTILS_CUH
 #define GPUGRANULARSYNTH_UTILS_CUH
 
+#include <chrono>
 #include <stdlib.h>
 #include <iostream>
 #include <sstream>
@@ -29,6 +30,14 @@ inline void cuda_check_last(const char* file, int line) {
             << "after kernel launch at: " << file << ":" << line << "\n";
         std::exit(EXIT_FAILURE);
     }
+}
+
+using namespace std::chrono_literals;
+
+// e.g., 'sleep(10ms)'
+template<typename Rep, typename Period>
+void sleep(const std::chrono::duration<Rep, Period>& duration) {
+    std::this_thread::sleep_for(duration);
 }
 
 #endif //GPUGRANULARSYNTH_UTILS_CUH
