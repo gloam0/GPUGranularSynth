@@ -17,7 +17,7 @@
 namespace config {
 
 // Audio
-    inline int SAMPLE_RATE = 48000;  // non-const, sample rate can technically change at runtime
+    inline double SAMPLE_RATE = 48000.;  // non-const, sample rate can technically change at runtime
     constexpr int GEN_BLOCK_SIZE = 1024;
     inline int DEV_BLOCK_SIZE = 128;
     // Number of GPU-write-CPU-read buffers in the ring (>1), e.g., 3 for triple-buffering,
@@ -25,13 +25,15 @@ namespace config {
     constexpr int BUFFER_RING_SIZE = 3;
 // Audio (non-configurable)
     constexpr int NUM_CHANNELS = 2;
+// Control
+    constexpr int CONTROL_POLL_RATE_HZ = 256;
 // CUDA
     constexpr int CUDA_SELECTED_DEVICE = 0;
 
 // Helpers
     inline double block_latency_ms() noexcept {
         // duration (ms) of one generator block
-        return 1000.0 * static_cast<double>(GEN_BLOCK_SIZE) / static_cast<double>(SAMPLE_RATE);
+        return 1000.0 * static_cast<double>(GEN_BLOCK_SIZE) / SAMPLE_RATE;
     }
     inline double ring_latency_ms() noexcept {
         // total pipeline latency (ms) of ring
