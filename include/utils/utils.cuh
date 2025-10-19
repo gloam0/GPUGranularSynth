@@ -1,7 +1,6 @@
 #ifndef GPUGRANULARSYNTH_UTILS_CUH
 #define GPUGRANULARSYNTH_UTILS_CUH
 
-#include <chrono>
 #include <stdlib.h>
 #include <iostream>
 #include <sstream>
