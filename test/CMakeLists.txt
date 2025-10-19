@@ -1,7 +1,8 @@
 add_executable(unit_tests
         main_tests.cpp
         test_spsc_ring_state.cpp
-        test_spsc_ring_consumer.cpp
+        test_spsc_ring_audio_blocks.cpp
+        test_control_poller.cpp
 )
 
 target_include_directories(unit_tests
@@ -13,8 +14,7 @@ target_include_directories(unit_tests
 target_link_libraries(unit_tests
         PRIVATE
         utils
-        dataflow
-        audio
+        controls
         juce::juce_core
         juce::juce_events
         juce::juce_audio_devices
