@@ -1,5 +1,5 @@
 #include <config.hpp>
-#include <utils/utils.hpp>
+#include <utils/utils.cuh>
 #include <utils/cuda_dev_info.hpp>
 #include <cuda_runtime.h>
 
