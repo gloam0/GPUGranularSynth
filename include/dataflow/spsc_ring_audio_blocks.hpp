@@ -5,17 +5,94 @@
 #include <dataflow/spsc_ring_state.hpp>
 #include <audio/types.hpp>
 
-class SPSCRingConsumer {
+class SPSCRingAudioBlocks {
 public:
-    SPSCRingConsumer(SPSCRingState& rs, std::vector<AudioBlock>& ring);
+    SPSCRingAudioBlocks(SPSCRingState& rs, std::vector<AudioBlock>& ring) : rs(rs), ring(ring) {}
 
-    void start();
-    void stop();
+    void start() {
+        r_curr = 0;
+        slot = 0;
+        sample_idx = 0;
+        have_block = false;
+        try_acquire_block();
+    }
+
+    void stop() {
+        if (have_block && block_acquired) rs.publish_read(r_curr);
+        have_block = false;
+        block_acquired = false;
+    }
+
     // copies directly from ring to out
-    void consume(float* const* out, int num_channels, int num_samples);
+    void consume(float* const* out, int num_channels, int num_samples) {
+        // zero all (extra channels; guard against underruns with no last_good)
+        for (int ch = 0; ch < num_channels; ++ch)
+            std::fill_n(out[ch], num_samples, 0.0f);
+
+        /*
+         * Consume audio blocks from the ring buffer and write them to audio out.
+         * The ring buffer and audio out may have different audio block sizes by
+         * design (we don't necessarily consume a whole ring buffer slot on each
+         * iteration of this callback, nor do we necessarily fill the whole output
+         * buffer with one ring buffer slot).
+         */
+        int i = 0;
+        while (i < num_samples) {
+            // read if we don't have a block currently; break (safe - zeros in buffer) if
+            // underrun and implicit get_last_good() failed.
+            if (!have_block) { if (!try_acquire_block()) break; }
+
+            const auto& block = ring[slot];
+            const int samples_avail = static_cast<int>(block.samples) - static_cast<int>(sample_idx);
+            const int samples_to_copy = std::min(samples_avail, num_samples - i);
+
+            // planar copy
+            for (int ch = 0; ch < std::min<int>(num_channels, AudioBlock::channels); ++ch) {
+                std::memcpy(
+                    out[ch] + i,
+                    block.ch(ch) + sample_idx,
+                    static_cast<size_t>(samples_to_copy) * sizeof(float)
+                );
+            } // extra device channels remain zero
+
+            // update state
+            sample_idx += samples_to_copy;
+            i += samples_to_copy;
+
+            // if we finished consuming the current block this iter, publish the
+            // read and mark have_block false.
+            if (sample_idx >= ring[slot].samples) {
+                if (have_block && block_acquired) rs.publish_read(r_curr);
+                have_block = false;
+                block_acquired = false;
+            }
+        }
+    }
 
 private:
-    bool try_acquire_block();
+    bool try_acquire_block() {
+        size_t slot_next{};
+        uint64_t r_curr_next{r_curr};
+        if (rs.acquire_read(r_curr_next, slot_next)) {
+            slot = slot_next;
+            r_curr = r_curr_next;
+            sample_idx = 0;
+            have_block = true;
+            block_acquired = true;
+            return true;
+        }
+        // fallback, did not acquire a new block
+        if (rs.get_last_good(slot_next)) {
+            slot = slot_next;
+            sample_idx = 0;
+            have_block = true;
+            block_acquired = false;  // do not publish_read()
+            return true;
+        }
+        have_block = false;
+        block_acquired = false;
+        return false;
+    }
 
     SPSCRingState& rs;
     std::vector<AudioBlock>& ring;
