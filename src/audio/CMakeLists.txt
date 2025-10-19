@@ -10,7 +10,7 @@ target_include_directories(audio
 target_link_libraries(audio
         PRIVATE
         CUDA::cudart
-        # juce::juce_core
+        juce::juce_core
         # juce::juce_events
         juce::juce_audio_devices
 )
