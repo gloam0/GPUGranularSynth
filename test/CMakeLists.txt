@@ -3,6 +3,7 @@ add_executable(unit_tests
         test_spsc_ring_state.cpp
         test_spsc_ring_audio_blocks.cpp
         test_control_poller.cpp
+        test_sample_clock.cpp
 )
 
 target_include_directories(unit_tests
